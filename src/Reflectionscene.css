@@ -1,0 +1,63 @@
+.reflection-content {
+  transition: opacity 0.5s ease-in-out;
+  opacity: 0;
+  padding: 2rem; 
+  margin: 1rem; 
+}
+.reflection-content.visible {
+  opacity: 1;
+}
+.reveal-step {
+  animation: fadeIn 0.8s ease-out;
+  padding: 1rem 0; 
+}
+.metric-card.standout {
+  background: #f1f5f9; 
+  border-color: #3b82f6; 
+  margin: 1rem; 
+  padding: 1.5rem; 
+}
+.reveal-button {
+  display: block;
+  margin: 2rem auto 0;
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+  background-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+  border: none;
+  border-radius: 0.75rem; 
+  cursor: pointer;
+  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1); 
+}
+.reveal-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); 
+}
+.metric-card.shock .metric-value {
+  color: #ef4444;
+}
+.reflection-title.shock {
+  color: #dc2626;
+  padding: 0.6rem; 
+  margin: 1rem 0;
+}
+.shock-text {
+  font-family: 'Courier New', Courier, monospace;
+  text-align: center;
+  font-size: 1.2rem;
+  color: #334155; 
+  margin: 1.5rem auto; 
+  padding: 0 1.5rem; 
+  max-width: 90%;
+}
+
+.reflection-scene {
+  padding: 2rem; 
+  box-sizing: border-box;
+}
+
+.metric-card {
+  margin: 1rem;
+  padding: 1.5rem; 
+}

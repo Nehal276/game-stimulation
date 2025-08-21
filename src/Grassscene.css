@@ -1,0 +1,105 @@
+.grass-background {
+  position: absolute;
+  inset: 0;
+  background-image: url('../src/assets/Desktop-1.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: 0;
+}
+
+.grass-background::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 60%, rgba(255, 255, 255, 1) 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.vignette-overlay, .bloom-overlay, .grain-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.vignette-overlay {
+  z-index: 3;
+  background: radial-gradient(60% 60% at 50% 50%, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.92) 35%, rgba(0,0,0,0.96) 60%, rgba(0,0,0,1) 100%);
+  animation: vignetteFade 3s ease-in-out forwards;
+}
+
+.bloom-overlay {
+  z-index: 4;
+  background: radial-gradient(closest-side at 60% 65%, rgba(255,240,200,0.28), rgba(255,240,200,0) 60%);
+  opacity: 0;
+  animation: bloomPulse 2.2s ease-out forwards 0.6s;
+}
+
+.grain-overlay {
+  z-index: 5;
+  opacity: 0.12;
+  mix-blend-mode: multiply;
+  background-image: radial-gradient(rgba(0,0,0,0.05) 1px, transparent 1px), radial-gradient(rgba(0,0,0,0.05) 1px, transparent 1px);
+  background-size: 3px 3px, 5px 5px;
+  background-position: 0 0, 10px 10px;
+  animation: grainDrift 6s linear infinite;
+}
+
+.walk-forward {
+  left: -30vw;
+  animation: walkForward 6s ease-out forwards 0.6s;
+}
+
+.walk-backward {
+  right: -1vw;
+  transform: scaleX(-1);
+  animation: walkBackward 6s ease-out forwards;
+}
+
+.walk-finished {
+  left: 40%;
+  transform: translateX(-50%);
+}
+
+.zoom-effect {
+  animation: zoomIn 2s forwards;
+  transform-origin: center center;
+}
+
+.message-popup {
+  position: absolute;
+  right: 5vw;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 18px;
+  max-width: 360px;
+}
+
+.message-bubble, .letsgo-message {
+  opacity: 0;
+  background-color: #ffffff;
+  padding: 14px 20px;
+  border-radius: 20px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  font-size: 18px;
+  color: #333;
+}
+
+.letsgo-message button {
+  margin-top: 12px;
+  padding: 10px 16px;
+  background-color: #009688;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.slide-in { animation: slideInFromLeft 0.9s ease-out forwards; }
+.fade-in { animation: softFadeUp 1.2s ease-out forwards; }

@@ -3,6 +3,7 @@ import '../Scene.css';
 import '../Grassscene.css'
 import walkingGif from '../assets/manwalkingbg.gif';
 import idleGif from '../assets/phonepings.gif';
+import { content } from '../components/content'
 
 // controls the props which were directed to this file
 type Props = {
@@ -13,16 +14,13 @@ const GrassScene: React.FC<Props> = ({ onNext }) => {
   // Helps on moving the gif front and back
   const [walkPhase, setWalkPhase] = useState<'forward' | 'backward' | 'done'>('forward');
   // Makes the message bubble visible
-  const [showFirstMessage, setShowFirstMessage] = useState(false);
-  const [showSecondMessage, setShowSecondMessage] = useState(false);
+  const [showMessage, setShowMessage] = useState(false);
 
   // After the character finishes the walking animation, this helps in making the messages visible
   useEffect(() => {
     if (walkPhase === 'done') {
-      const t1 = setTimeout(() => setShowFirstMessage(true), 300);
-      const t2 = setTimeout(() => setShowSecondMessage(true), 2000);
+      const t2 = setTimeout(() => setShowMessage(true), 2000);
       return () => {
-        clearTimeout(t1);
         clearTimeout(t2);
       };
     }
@@ -67,20 +65,15 @@ const GrassScene: React.FC<Props> = ({ onNext }) => {
 
         {/* Message pop-up on the right*/}
         <div className="message-popup">
-          {showFirstMessage && (
-            <div className="message-bubble slide-in">
-              "If anything feels weird... I'm right here."
-            </div>
-          )}
 
-          {showSecondMessage && (
+          {showMessage && (
             <div className="letsgo-message fade-in">
               <h4>
-                Try me out, I am always here when you need.
+               {content.grassscene.messageTitle}
               </h4>
               <br></br>
-              <h5>You know that I am getting better at understanding you anyways!</h5>
-              <button onClick={onNext}>Let's go</button>
+              <h5>{content.grassscene.messageSubtitle}</h5>
+              <button onClick={onNext}>{content.grassscene.button}</button>
             </div>
           )}
         </div>

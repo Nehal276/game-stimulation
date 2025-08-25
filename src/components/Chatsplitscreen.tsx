@@ -6,7 +6,7 @@ import friendstatic from '../assets/friendstatic.png';
 import walkingGif from '../assets/manwalkingbg.gif';
 import idleGif from '../assets/phonepings.gif';
 import parkBackground from '../assets/Desktop-1.png';
-
+import { content } from '../components/content';
 
 type Props = {
   // Passes the data to the next page
@@ -47,7 +47,7 @@ const Chatsplitscreen: React.FC<Props> = ({ onNext }) => {
   const [originalUserDraft, setOriginalUserDraft] = useState('');
   const [friendImageSrc, setFriendImageSrc] = useState(friendgif);
   const [messages, setMessages] = useState<Message[]>([
-    { id: 1, text: "I am ready to help. Let me know what your thoughts are and we will figure it out together. It will just take a few minutes.", sender: 'bot' }
+    { id: 1, text: content.Chatsplitscreen.initialBotMessage, sender: 'bot' }
   ]);
   // Value of the user's text area
   const [inputValue, setInputValue] = useState('');
@@ -66,26 +66,11 @@ const Chatsplitscreen: React.FC<Props> = ({ onNext }) => {
   const chatThreadRef = useRef<HTMLDivElement>(null);
   const [isCrafting, setIsCrafting] = useState(false);
 
-// Options avaible by the AI-response builder
-  const responseOptions: Record<BuilderStep, ResponseOption[]> = {
-    step1: [
-      { id: 's1o1', label: 'Acknowledge the gap', text: "You're right, it's amazing how wide the gap between two people's perspectives can be." },
-      { id: 's1o2', label: 'Mention a story', text: "It's true. It makes you realize how easily misunderstandings can happen, even between friends." },
-    ],
-    step2: [
-      { id: 's2o1', label: 'Suggest it\'s our assumptions', text: "I think we're all trapped by our own assumptions. We see what our past has trained us to see." },
-      { id: 's2o2', label: 'Suggest it\'s the words', text: "Words are the real problem. They're such clumsy tools to describe what we're actually feeling inside." },
-    ],
-    step3: [
-        { id: 's3o1', label: 'Suggest being careful', text: "It means we have to be extra careful to make sure we're on the same page, I guess." },
-        { id: 's3o2', label: 'Check if it makes sense', text: "Does that make sense? I want to make sure I'm explaining my own perspective clearly." },
-    ],
-    review: []
-  };
 // Adds a new message to the thread
   const addMessage = useCallback((text: string, sender: 'user' | 'bot', options?: ResponseOption[], isActionable?: boolean) => {
     setMessages(prev => [...prev.map(m => ({...m, options: undefined, isActionable: false})), { id: Date.now(), text, sender, options, isActionable }]);
   }, []);
+
 // trigged when the user send their first response
   const handleSendToBot = useCallback(() => {
     if (!inputValue.trim()) return;
@@ -103,11 +88,11 @@ const Chatsplitscreen: React.FC<Props> = ({ onNext }) => {
         setIsBuilderActive(true);
         // Slight delay before the bot responds
         setTimeout(() => {
-          addMessage("That's a good start. I think you can make it better by adding more.", 'bot', responseOptions.step1);
+          addMessage(content.Chatsplitscreen.botStart, 'bot', content.Chatsplitscreen.responseOptions.step1);
         }, 1200);
       }
     }, 800);
-  }, [inputValue, addMessage, isBuilderActive, originalUserDraft, responseOptions.step1]);
+  }, [inputValue, addMessage, isBuilderActive, originalUserDraft]);
 //  Adds the select text through the options
   const selectOption = useCallback((option: ResponseOption) => {
     setIsCrafting(true);
@@ -125,20 +110,20 @@ const Chatsplitscreen: React.FC<Props> = ({ onNext }) => {
     setTimeout(() => {
         if (nextStepKey && nextStepKey !== 'review') {
             setCurrentStep(nextStepKey);
-            addMessage(`Step ${currentIndex + 2} of 3. Let's continue.`, 'bot', responseOptions[nextStepKey]);
+            addMessage(content.Chatsplitscreen.botContinue(currentIndex + 2), 'bot', content.Chatsplitscreen.responseOptions[nextStepKey]);;
         } else {
             setCurrentStep('review');
-            addMessage("This flows nicely. You can add more, or transmit it now.", 'bot', undefined, true);
+            addMessage(content.Chatsplitscreen.botReview, 'bot', undefined, true);
         }
         setIsCrafting(false);
     }, 1200);
-  }, [builtResponse, currentStep, addMessage, responseOptions]);
+  }, [builtResponse, currentStep, addMessage]);
 // User can revert back to their original response
   const keepOriginalResponse = useCallback(() => {
     if (originalUserDraft) {
         setIsCrafting(true);
         setInputValue(originalUserDraft);
-        addMessage("Reverting to your original words. Ready to send.", 'bot', undefined, true);
+        addMessage(content.Chatsplitscreen.botReverting, 'bot', undefined, true);
         setMetrics(prev => ({ ...prev, choseAuthenticity: true }));
         setTimeout(() => setIsCrafting(false), 500);
     }
@@ -160,14 +145,14 @@ const Chatsplitscreen: React.FC<Props> = ({ onNext }) => {
     setIsRevealed(true);
     setTimeout(() => {
         const friendMessage = finalMetrics.choseAuthenticity ?
-          "Wow, that's a really interesting way to put it forward." :
-          "Ahh okay, but for some reason this does not feel like you";
+          content.Chatsplitscreen.friendResponsePositive  :
+          content.Chatsplitscreen.friendResponseNegative ;
         setRevealedFriendMessage(friendMessage);
         addMessage(friendMessage, 'bot');
         setTimeout(() => {
             const aiFinalMessage = finalMetrics.choseAuthenticity ?
-              "Analysis: Congrats you prioritized authenticity more than optimization" :
-              "Analysis: You followed AI-guided suggestions";
+              content.Chatsplitscreen.analysisPositive :
+              content.Chatsplitscreen.analysisNegative;
             addMessage(aiFinalMessage, 'bot');
             setTimeout(() => { onNext(finalMetrics); }, 4000);
         }, 2500);
@@ -200,8 +185,8 @@ const Chatsplitscreen: React.FC<Props> = ({ onNext }) => {
   <img src={friendImageSrc} alt="Friend character" className={`walker friend-walker ${animationPhase === 'walking' ? 'walk-from-left' : 'friend-final-position'}`} />
   {animationPhase === 'greeting' && (
   <>
-  <div className="greeting-bubble man-greeting fade-in-greeting">"Hello! How are you?"</div>
-  <div className="greeting-bubble friend-greeting fade-in-greeting">"Hey there"</div>
+  <div className="greeting-bubble man-greeting fade-in-greeting">{content.Chatsplitscreen.manGreeting}</div>
+  <div className="greeting-bubble friend-greeting fade-in-greeting">{content.Chatsplitscreen.friendGreeting}</div>
   </>
   )}
   {animationPhase === 'chatting' && (
@@ -209,12 +194,12 @@ const Chatsplitscreen: React.FC<Props> = ({ onNext }) => {
   <div className="story-surface">
   {!isRevealed && bubbleStep === 1 && (
    <div className="friend-bubble fade-in">
-   "Actually I wanted to ask you something and I know you are the right person to have this conversation with"
+   {content.Chatsplitscreen.friendBubble1}
     </div>
    )}
    {!isRevealed && bubbleStep === 2 && (
     <div className="friend-bubble fade-in">
-    "So I have been thinking, How amazing it is that two people can look at the exact same situation and see completely different things. What do you think about that?"
+    {content.Chatsplitscreen.friendBubble2}
      </div>
     )}
               {isRevealed && (
@@ -224,7 +209,7 @@ const Chatsplitscreen: React.FC<Props> = ({ onNext }) => {
               )}
             </div>
             <div className="chat-surface">
-              <h3 className={`panel-title ${isRevealed && !metrics.choseAuthenticity ? 'text-glitch' : ''}`}>{isRevealed ? "Session Log" : 'Your Inner Voice'}</h3>
+              <h3 className={`panel-title ${isRevealed && !metrics.choseAuthenticity ? 'text-glitch' : ''}`}>{isRevealed ? content.Chatsplitscreen.panelTitleRevealed : content.Chatsplitscreen.panelTitle}</h3>
               <div className="chat-thread" ref={chatThreadRef}>
                 {messages.map((msg) => (
                   <div key={msg.id} className={`msg ${msg.sender}`}>
@@ -240,15 +225,15 @@ const Chatsplitscreen: React.FC<Props> = ({ onNext }) => {
                     )}
                     {msg.isActionable && (
                         <div className="message-actions">
-                          <button className="cta-btn" onClick={handleSendMessage}>Transmit Response</button>
+                          <button className="cta-btn" onClick={handleSendMessage}>{content.Chatsplitscreen.transmitButton}</button>
                         </div>
                     )}
                   </div>
                 ))}
               </div>
               <div className="composer">
-                <label htmlFor="user-message-input">Compose response:</label>
-                <textarea id="user-message-input" className={`input-area ${isCrafting ? 'is-crafting' : ''}`} placeholder="Start typing your thoughts here...." value={inputValue} onChange={(e) => setInputValue(e.target.value)} disabled={isBuilderActive || isRevealed} aria-label="Your message input" />
+                <label htmlFor="user-message-input">{content.Chatsplitscreen.composerLabel}</label>
+                <textarea id="user-message-input" className={`input-area ${isCrafting ? 'is-crafting' : ''}`} placeholder={content.Chatsplitscreen.composerPlaceholder} value={inputValue} onChange={(e) => setInputValue(e.target.value)} disabled={isBuilderActive || isRevealed} aria-label="Your message input" />
                 <div className="row">
                   <button className="cta-btn" onClick={handleSendToBot} disabled={!inputValue.trim() || isRevealed || isBuilderActive}>
                     Send to Bot
@@ -256,7 +241,7 @@ const Chatsplitscreen: React.FC<Props> = ({ onNext }) => {
                 </div>
                 {isBuilderActive && !isRevealed && originalUserDraft && (
                   <div className="keep-original-container">
-                    <button className="keep-original-btn" onClick={keepOriginalResponse}>Revert to my words</button>
+                    <button className="keep-original-btn" onClick={keepOriginalResponse}>{content.Chatsplitscreen.revertButton}</button>
                   </div>
                 )}
               </div>

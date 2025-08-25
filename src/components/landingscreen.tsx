@@ -1,6 +1,7 @@
 import React from 'react';
 import '../landingscreen.css';
-import hellosaysfinal from '../assets/hello.gif'
+import hellosaysfinal from '../assets/hello.gif';
+import { content } from '../components/content';
 
 type Props = {
   onNext: () => void;
@@ -28,11 +29,11 @@ const LandingScreen: React.FC<Props> = ({ onNext }) => {
 
       {/* Greeting text */}
       <div className="content-section">
-        <h1 className="main-title">Hello! Good to see you here.</h1>
-        <p className="subtitle">I have a request to ask, Will you help me out through the day?</p>
+        <h1 className="main-title"> {content.landingscreen.title}</h1>
+        <p className="subtitle">{content.landingscreen.subtitle}</p>
         {/*Start button section */}
         <button className="start-button" onClick={onNext}>
-          <span>Yes, Sure!</span>
+          <span>{content.landingscreen.button}</span>
         </button>
       </div>
     </div>

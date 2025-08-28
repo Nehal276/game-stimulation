@@ -9,10 +9,9 @@ import parkBackground from '../assets/Desktop-1.png';
 import { content } from '../components/content';
 
 type Props = {
-  // Passes the data to the next page
   onNext: (metrics: UserMetrics) => void; 
 };
-//  Structure of the data collected
+
 export interface UserMetrics {
   builderUses: number;
   timeToCompose: number;
@@ -20,7 +19,7 @@ export interface UserMetrics {
   finalResponse: string;
   choseAuthenticity: boolean;
 }
-// Shows a single message
+
 interface Message {
   id: number;
   text: string;
@@ -33,48 +32,38 @@ interface ResponseOption {
   label: string;
   text: string;
 }
-// Defines the review steps in chatbot
+
 type BuilderStep = 'step1' | 'step2' | 'step3' | 'review';
 
-
 const Chatsplitscreen: React.FC<Props> = ({ onNext }) => {
-  // Gretting animation when character walks in
   const [animationPhase, setAnimationPhase] = useState<'walking' | 'greeting' | 'chatting'>('walking');
-  // Sees if the final outcome is revealed
   const [isRevealed, setIsRevealed] = useState(false);
-  // Controls the AI builder
   const [isBuilderActive, setIsBuilderActive] = useState(false);
   const [originalUserDraft, setOriginalUserDraft] = useState('');
   const [friendImageSrc, setFriendImageSrc] = useState(friendgif);
   const [messages, setMessages] = useState<Message[]>([
     { id: 1, text: content.Chatsplitscreen.initialBotMessage, sender: 'bot' }
   ]);
-  // Value of the user's text area
   const [inputValue, setInputValue] = useState('');
-  // Friend's final message which is determined by user's choices
   const [revealedFriendMessage, setRevealedFriendMessage] = useState('');
-  // Initial Dialogue Bubble
   const [bubbleStep, setBubbleStep] = useState(1);
+  const [showChatOverlay, setShowChatOverlay] = useState(false);
   const [currentStep, setCurrentStep] = useState<BuilderStep>('step1');
   const [builtResponse, setBuiltResponse] = useState({ step1: '', step2: '', step3: '' });
-  // Main tracking metrics like time, usage, and authenticity
   const [metrics, setMetrics] = useState<UserMetrics>({
     builderUses: 0, timeToCompose: 0, originalDraft: '', finalResponse: '', choseAuthenticity: false
   });
-  // Timestamps
   const [startTime, setStartTime] = useState<number>(0);
   const chatThreadRef = useRef<HTMLDivElement>(null);
   const [isCrafting, setIsCrafting] = useState(false);
 
-// Adds a new message to the thread
+  // ... (addMessage, handleSendToBot, and other functions remain exactly the same) ...
   const addMessage = useCallback((text: string, sender: 'user' | 'bot', options?: ResponseOption[], isActionable?: boolean) => {
     setMessages(prev => [...prev.map(m => ({...m, options: undefined, isActionable: false})), { id: Date.now(), text, sender, options, isActionable }]);
   }, []);
 
-// trigged when the user send their first response
   const handleSendToBot = useCallback(() => {
     if (!inputValue.trim()) return;
-    // saves the response
     if (originalUserDraft === '') {
       setOriginalUserDraft(inputValue);
     }
@@ -86,14 +75,13 @@ const Chatsplitscreen: React.FC<Props> = ({ onNext }) => {
 
       if (!isBuilderActive) {
         setIsBuilderActive(true);
-        // Slight delay before the bot responds
         setTimeout(() => {
           addMessage(content.Chatsplitscreen.botStart, 'bot', content.Chatsplitscreen.responseOptions.step1);
         }, 1200);
       }
     }, 800);
   }, [inputValue, addMessage, isBuilderActive, originalUserDraft]);
-//  Adds the select text through the options
+
   const selectOption = useCallback((option: ResponseOption) => {
     setIsCrafting(true);
     setMetrics(prev => ({ ...prev, builderUses: prev.builderUses + 1, choseAuthenticity: false }));
@@ -110,7 +98,7 @@ const Chatsplitscreen: React.FC<Props> = ({ onNext }) => {
     setTimeout(() => {
         if (nextStepKey && nextStepKey !== 'review') {
             setCurrentStep(nextStepKey);
-            addMessage(content.Chatsplitscreen.botContinue(currentIndex + 2), 'bot', content.Chatsplitscreen.responseOptions[nextStepKey]);;
+            addMessage(content.Chatsplitscreen.botContinue(currentIndex + 2), 'bot', content.Chatsplitscreen.responseOptions[nextStepKey]);
         } else {
             setCurrentStep('review');
             addMessage(content.Chatsplitscreen.botReview, 'bot', undefined, true);
@@ -118,7 +106,7 @@ const Chatsplitscreen: React.FC<Props> = ({ onNext }) => {
         setIsCrafting(false);
     }, 1200);
   }, [builtResponse, currentStep, addMessage]);
-// User can revert back to their original response
+
   const keepOriginalResponse = useCallback(() => {
     if (originalUserDraft) {
         setIsCrafting(true);
@@ -128,8 +116,6 @@ const Chatsplitscreen: React.FC<Props> = ({ onNext }) => {
         setTimeout(() => setIsCrafting(false), 500);
     }
   }, [originalUserDraft, addMessage]);
-
-  // Handles transmit response
 
   const handleSendMessage = useCallback(() => {
     if (!inputValue.trim()) return;
@@ -145,8 +131,8 @@ const Chatsplitscreen: React.FC<Props> = ({ onNext }) => {
     setIsRevealed(true);
     setTimeout(() => {
         const friendMessage = finalMetrics.choseAuthenticity ?
-          content.Chatsplitscreen.friendResponsePositive  :
-          content.Chatsplitscreen.friendResponseNegative ;
+          content.Chatsplitscreen.friendResponsePositive :
+          content.Chatsplitscreen.friendResponseNegative;
         setRevealedFriendMessage(friendMessage);
         addMessage(friendMessage, 'bot');
         setTimeout(() => {
@@ -159,95 +145,110 @@ const Chatsplitscreen: React.FC<Props> = ({ onNext }) => {
     }, 1500);
   }, [inputValue, metrics, startTime, onNext, addMessage, originalUserDraft, isBuilderActive]);
 
+  // --- UPDATED useEffect SECTION ---
+
+  // This useEffect handles the initial animation sequence and only runs ONCE.
   useEffect(() => {
     const walkingTimer = setTimeout(() => setAnimationPhase('greeting'), 4000);
     const greetingTimer = setTimeout(() => {
       setAnimationPhase('chatting');
-      setStartTime(Date.now());
-      setTimeout(() => setBubbleStep(2), 8000);
       setFriendImageSrc(friendstatic);
     }, 6000);
+    const dialogueTimer1 = setTimeout(() => setBubbleStep(2), 8000);
+    const dialogueTimer2 = setTimeout(() => setShowChatOverlay(true), 12000);
+    
     return () => {
       clearTimeout(walkingTimer);
       clearTimeout(greetingTimer);
+      clearTimeout(dialogueTimer1);
+      clearTimeout(dialogueTimer2);
     };
-  }, []);
+  }, []); // <-- Empty dependency array means this runs only on mount.
 
+  // This useEffect handles starting the timer for metrics.
+  // It runs whenever showChatOverlay changes.
   useEffect(() => {
-    if (chatThreadRef.current) { chatThreadRef.current.scrollTop = chatThreadRef.current.scrollHeight; }
+    if (showChatOverlay && startTime === 0) {
+      setStartTime(Date.now());
+    }
+  }, [showChatOverlay, startTime]);
+
+  // This useEffect handles scrolling the chat thread.
+  useEffect(() => {
+    if (chatThreadRef.current) {
+      chatThreadRef.current.scrollTop = chatThreadRef.current.scrollHeight;
+    }
   }, [messages]);
 
+  // ... (The return statement with all the JSX remains exactly the same) ...
   return (
-  <div className="scene-container">
-  <div className="grass-background" style={{ backgroundImage: `url(${parkBackground})` }} />
-  <div className="world">
-  <img src={animationPhase === 'chatting' ? idleGif : walkingGif} alt="Man character" className={`walker man-walker ${animationPhase === 'walking' ? 'walk-from-right' : 'man-final-position'}`} />
-  <img src={friendImageSrc} alt="Friend character" className={`walker friend-walker ${animationPhase === 'walking' ? 'walk-from-left' : 'friend-final-position'}`} />
-  {animationPhase === 'greeting' && (
-  <>
-  <div className="greeting-bubble man-greeting fade-in-greeting">{content.Chatsplitscreen.manGreeting}</div>
-  <div className="greeting-bubble friend-greeting fade-in-greeting">{content.Chatsplitscreen.friendGreeting}</div>
-  </>
-  )}
-  {animationPhase === 'chatting' && (
-  <div className="split-scene fade-in-interface">
-  <div className="story-surface">
-  {!isRevealed && bubbleStep === 1 && (
-   <div className="friend-bubble fade-in">
-   {content.Chatsplitscreen.friendBubble1}
-    </div>
-   )}
-   {!isRevealed && bubbleStep === 2 && (
-    <div className="friend-bubble fade-in">
-    {content.Chatsplitscreen.friendBubble2}
-     </div>
-    )}
-              {isRevealed && (
-                  <div className={`friend-bubble ${metrics.choseAuthenticity ? 'positive-effect' : 'glitch-effect'}`}>
-                    {revealedFriendMessage}
-                  </div>
-              )}
-            </div>
-            <div className="chat-surface">
-              <h3 className={`panel-title ${isRevealed && !metrics.choseAuthenticity ? 'text-glitch' : ''}`}>{isRevealed ? content.Chatsplitscreen.panelTitleRevealed : content.Chatsplitscreen.panelTitle}</h3>
-              <div className="chat-thread" ref={chatThreadRef}>
-                {messages.map((msg) => (
-                  <div key={msg.id} className={`msg ${msg.sender}`}>
-                    {msg.text}
-                    {msg.options && (
-                      <div className="message-options">
-                        {msg.options.map(option => (
-                          <button key={option.id} className="ghost-btn" onClick={() => selectOption(option)}>
-                            {option.label}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                    {msg.isActionable && (
-                        <div className="message-actions">
-                          <button className="cta-btn" onClick={handleSendMessage}>{content.Chatsplitscreen.transmitButton}</button>
-                        </div>
-                    )}
-                  </div>
-                ))}
+    <div className="scene-container">
+      <div className="grass-background" style={{ backgroundImage: `url(${parkBackground})` }} />
+      <div className="world">
+        <img src={animationPhase === 'chatting' ? idleGif : walkingGif} alt="Man character" className={`walker man-walker ${animationPhase === 'walking' ? 'walk-from-right' : 'man-final-position'}`} />
+        <img src={friendImageSrc} alt="Friend character" className={`walker friend-walker ${animationPhase === 'walking' ? 'walk-from-left' : 'friend-final-position'}`} />
+        
+        {animationPhase === 'greeting' && (
+          <>
+            <div className="greeting-bubble man-greeting fade-in-greeting">{content.Chatsplitscreen.manGreeting}</div>
+            <div className="greeting-bubble friend-greeting fade-in-greeting">{content.Chatsplitscreen.friendGreeting}</div>
+          </>
+        )}
+        {animationPhase === 'chatting' && (
+          <div className="story-surface">
+            {!isRevealed && bubbleStep === 1 && (
+              <div className="friend-bubble fade-in">{content.Chatsplitscreen.friendBubble1}</div>
+            )}
+            {!isRevealed && bubbleStep === 2 && (
+              <div  className={`friend-bubble fade-in ${showChatOverlay ? 'highlight' : ''}`}>{content.Chatsplitscreen.friendBubble2}</div>
+            )}
+            {isRevealed && (
+              <div className={`friend-bubble ${metrics.choseAuthenticity ? 'positive-effect' : 'glitch-effect'}`}>
+                {revealedFriendMessage}
               </div>
-              <div className="composer">
-                <label htmlFor="user-message-input">{content.Chatsplitscreen.composerLabel}</label>
-                <textarea id="user-message-input" className={`input-area ${isCrafting ? 'is-crafting' : ''}`} placeholder={content.Chatsplitscreen.composerPlaceholder} value={inputValue} onChange={(e) => setInputValue(e.target.value)} disabled={isBuilderActive || isRevealed} aria-label="Your message input" />
-                <div className="row">
-                  <button className="cta-btn" onClick={handleSendToBot} disabled={!inputValue.trim() || isRevealed || isBuilderActive}>
-                    Send to Bot
-                  </button>
-                </div>
-                {isBuilderActive && !isRevealed && originalUserDraft && (
-                  <div className="keep-original-container">
-                    <button className="keep-original-btn" onClick={keepOriginalResponse}>{content.Chatsplitscreen.revertButton}</button>
-                  </div>
-                )}
-              </div>
-            </div>
+            )}
           </div>
         )}
+      </div>
+      <div className={`chat-overlay ${showChatOverlay ? 'visible' : ''}`}>
+        <div className="chat-surface">
+          <h3 className={`panel-title ${isRevealed && !metrics.choseAuthenticity ? 'text-glitch' : ''}`}>{isRevealed ? content.Chatsplitscreen.panelTitleRevealed : content.Chatsplitscreen.panelTitle}</h3>
+          <div className="chat-thread" ref={chatThreadRef}>
+            {messages.map((msg) => (
+              <div key={msg.id} className={`msg ${msg.sender}`}>
+                {msg.text}
+                {msg.options && (
+                  <div className="message-options">
+                    {msg.options.map(option => (
+                      <button key={option.id} className="ghost-btn" onClick={() => selectOption(option)}>
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {msg.isActionable && (
+                    <div className="message-actions">
+                      <button className="cta-btn" onClick={handleSendMessage}>{content.Chatsplitscreen.transmitButton}</button>
+                    </div>
+                )}
+              </div>
+            ))}
+          </div>
+          <div className="composer">
+            <label htmlFor="user-message-input">{content.Chatsplitscreen.composerLabel}</label>
+            <textarea id="user-message-input" className={`input-area ${isCrafting ? 'is-crafting' : ''}`} placeholder={content.Chatsplitscreen.composerPlaceholder} value={inputValue} onChange={(e) => setInputValue(e.target.value)} disabled={isBuilderActive || isRevealed} aria-label="Your message input" />
+            <div className="row">
+              <button className="cta-btn" onClick={handleSendToBot} disabled={!inputValue.trim() || isRevealed || isBuilderActive}>
+                {content.Chatsplitscreen.sendButton}
+              </button>
+            </div>
+            {isBuilderActive && !isRevealed && originalUserDraft && (
+              <div className="keep-original-container">
+                <button className="keep-original-btn" onClick={keepOriginalResponse}>{content.Chatsplitscreen.revertButton}</button>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

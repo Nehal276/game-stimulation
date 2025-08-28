@@ -47,14 +47,23 @@
   left: 30%;
   transform: translateX(-50%);
   background: rgba(255, 255, 255, 0.6); 
-  backdrop-filter: blur(10px); 
   border: 1px solid rgba(255, 255, 255, 0.2); 
   border-radius: 1.5rem; 
   padding: 1.5rem; 
   max-width: 450px;
-  color: #334155; 
+  color: #000000; 
   box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1); 
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
   line-height: 1.7;
+}
+
+.friend-bubble.highlight {
+  transform: scale(1.03); /* Makes the bubble slightly larger */
+  background: white;
+  border: rgb(255, 63, 63);
+  border-style:outset;
+  box-shadow: 0 0 15px 5px rgba(238, 101, 101, 0.7); /* Adds a white glow */
+  z-index: 101;
 }
 
 .chat-surface {
@@ -244,6 +253,66 @@
   box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
   animation: pulse-glow 1.5s infinite alternate ease-in-out;
 }
+/* Overlay background */
+.chat-overlay {
+  position: fixed; /* Fixed feels more natural for overlays */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: flex-end; /* Push panel to the right */
+  align-items: center;
+  background: rgba(230, 250, 255, 0.186); /* Slightly softer dimming */
+ 
+  padding: 2rem;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.4s ease, visibility 0.4s ease;
+  z-index: 100;
+}
+
+.chat-overlay.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Chat panel */
+.chat-overlay .chat-surface {
+  width: 100%;
+  max-width: 420px;
+  height: 92%;
+  max-height: 820px;
+  position: relative;
+  background: #ffffff; 
+  border-radius: 24px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+  transform: translateX(60px) scale(0.98); 
+  opacity: 0.9;
+  transition: 
+    transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), 
+    opacity 0.3s ease;
+  overflow: hidden; 
+}
+
+.chat-overlay.visible .chat-surface {
+  transform: translateX(0) scale(1);
+  opacity: 1;
+}
+
+
+.chat-surface > * {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.chat-overlay.visible .chat-surface > * {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: 0.1s;
+}
+
 
 
 @keyframes pulse-glow {
